@@ -1,0 +1,10 @@
+{
+  "name": "huaxue-workbench-review-source",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test outputs/dsh-local-workbenches/controller.test.mjs outputs/huaxue-workbench/test/*.test.mjs",
+    "build": "node work/build-review-client.mjs"
+  }
+}
