@@ -1,0 +1,17 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const out=path.join(root,'outputs/huaxue-workbench');
+const members=JSON.parse(await readFile(path.join(root,'work/members.json'),'utf8'));
+for(const m of members)m.avatar='data:image/webp;base64,'+(await readFile(path.join(out,'assets',m.id+'.webp'))).toString('base64');
+const art={};for(const name of ['game-footer',...Array.from({length:5},(_,i)=>'game-scene-'+i)])art[name]='data:image/webp;base64,'+(await readFile(path.join(out,'assets',name+'.webp'))).toString('base64');
+const css=(await Promise.all(['style.css','native.css','game.css'].map(f=>readFile(path.join(out,f),'utf8')))).join('\n').replace('__FOOTER_IMAGE__',art['game-footer']);
+const games=JSON.parse(await readFile(path.join(out,'games.json'),'utf8'));
+const game=await readFile(path.join(root,'work/huaxue-game.template.js'),'utf8');
+let template=await readFile(path.join(root,'work/huaxue-client.template.js'),'utf8');
+for(const [key,value] of Object.entries({__GAME_CLIENT__:game,__GAME_ART__:JSON.stringify(art),__MEMBERS__:JSON.stringify(members),__CSS__:JSON.stringify(css),__GAMES__:JSON.stringify(games)}))template=template.replace(key,()=>value);
+await writeFile(path.join(out,'client.js'),template);
+const controller=(await readFile(path.join(root,'outputs/dsh-local-workbenches/controller.js'),'utf8')).replace('export class ','class ');
+await writeFile(path.join(root,'outputs/dsh-local-workbenches/client.js'),(await readFile(path.join(root,'work/workbench-host-client.template.js'),'utf8')).replace('__CONTROLLER__',()=>controller));
+console.log('Both review clients built. No installed application modified.');
