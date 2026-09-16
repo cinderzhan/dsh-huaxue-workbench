@@ -1,3 +1,4 @@
+throw new Error('旧宿主补丁安装器已停用。请按仓库根目录 INSTALL.md 安装独立工作台。');
 import { readFile, writeFile, mkdir, symlink, access, copyFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';

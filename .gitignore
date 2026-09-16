@@ -1,4 +1,7 @@
 node_modules/
-work/workbench-host-patches/
+*.tgz
+*.zip
 *.log
 .env*
+coverage/
+.test-artifacts/
