@@ -202,7 +202,7 @@ window.__ModuleLoader__.load({
           active && dialog === 'game' && gameContext.current && h(business.GameExperience, { key: gameContext.current.parentSessionId, runtime, api, parentSessionId: gameContext.current.parentSessionId, selected: gameContext.current.selected, close: () => { gameContext.current = null; setDialog(null); } }),
           active && dialog === 'skin' && h(business.WorkbenchDialog, { kind: 'skin', skin: view?.value.skin, person, draftStore: runtime.workbenches.businessState('skin', {}), close: () => setDialog(null), saveSkin: skin => { runtime.workbenches.assertActive(); return mutate([{ op: 'set', path: ['skin'], value: skin }]); } }));
       }
-      ctx.effect(() => service.register({ id: 'huaxue', title: '花少2 · 花学工作台', icon: '花', version: '0.3.5-desktop.1', customFrame: true,
+      ctx.effect(() => service.register({ id: 'huaxue', title: '花少2 · 花学工作台', icon: '花', version: '0.3.6-desktop.1', customFrame: true,
         description: '七位花学旅伴、花学拆解与第八位嘉宾游戏。', audience: '角色化聊天与沟通演练用户', requirements: '使用 Desktop 原生模型配置；需要服务端持久化归属查询。' }, DesktopPanel));
     }
     return { inject: ['desktopWorkbenches', 'sessions', 'workspaces', 'uiWorkspace', 'remote', 'remote.settings'], apply };

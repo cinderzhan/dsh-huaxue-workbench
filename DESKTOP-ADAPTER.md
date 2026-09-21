@@ -1,4 +1,4 @@
-# 花学 Desktop adapter · 0.3.5-desktop.1
+# 花学 Desktop adapter · 0.3.6-desktop.1
 
 包名 `dsh-huaxue-workbench`，工作台 ID `huaxue`。本次仅修改花学仓库；Desktop 依赖、lockfile、vendor catalog 和运行中实例由主 Agent 集成。本仓库提供可供本机市场加载的 provider，不等于已在运行中 Desktop 安装或获得公开市场收录。
 

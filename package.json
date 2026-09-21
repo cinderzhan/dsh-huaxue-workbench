@@ -1,6 +1,6 @@
 {
   "name": "dsh-huaxue-workbench",
-  "version": "0.3.5-desktop.1",
+  "version": "0.3.6-desktop.1",
   "description": "花少2花学工作台：Desktop 标准适配与独立宿主入口",
   "type": "module",
   "license": "UNLICENSED",
@@ -40,10 +40,10 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/schemastery": "^3.18.1",
-    "@deepseek-ai/dsh-settings": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.1.5-rc.2"
+    "@deepseek-ai/cordis": ">=4.0.1 <5.0.0-0",
+    "@deepseek-ai/schemastery": ">=3.18.1 <4.0.0-0",
+    "@deepseek-ai/dsh-settings": ">=0.1.5-rc.2 <0.2.0-0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.5-rc.2 <0.2.0-0"
   },
   "dsh": {
     "bundle": {
@@ -73,5 +73,9 @@
     "@deepseek-ai/dsh-settings": {
       "optional": true
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cinderzhan/dsh-huaxue-workbench.git"
   }
 }
