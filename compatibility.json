@@ -1,8 +1,8 @@
 {
-  "desktop": ["0.9.0"],
+  "desktop": ["0.1.1"],
   "harness": ["0.1.5-rc.2"],
-  "requiredSlots": ["main", "conversation.input.dock", "shell.overlay", "sidebar.footer.action"],
-  "requiredServices": ["layout.selectPanel", "sessions.list", "settings", "systemPrompt"],
+  "requiredSlots": ["desktop.workbench.frame"],
+  "requiredServices": ["desktopWorkbenches", "sessions.list", "settings", "systemPrompt", "desktopWorkbenchOwnership.read"],
   "presentationSelectors": ["[data-phase]"],
-  "status": "candidate-under-validation"
+  "status": "desktop-adapted"
 }

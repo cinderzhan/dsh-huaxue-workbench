@@ -1,5 +1,7 @@
 # 安装花学工作台
 
+`0.3.0-desktop.1` 使用 Desktop 标准 provider 安装路径，参见 [DESKTOP-ADAPTER.md](DESKTOP-ADAPTER.md)。下文为旧 standalone 安装流程，不适用于本版默认包；安装脚本会在任何写入前拒绝，防止混用两套宿主。
+
 本页对应 **0.3.0-rc.1 独立插件候选版**。这不是 `huashao2` 模式：**无需复制、创建或选择 `huashao2` 预设**，普通聊天和游戏均使用 `standard` 会话，通过工作台绑定加载角色规则。
 
 ## 适用版本

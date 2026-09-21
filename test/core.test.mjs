@@ -14,7 +14,7 @@ test('game assembly includes distinct reactions and isolates the dinner-scene di
   assert.equal(createTurnResolver(() => state)(agent).text, dinner);
 });
 
-test('only the selected persona is loaded and v2.4 is preserved', () => {
+test('only the selected persona is loaded and v2.5 is preserved', () => {
   assert.equal(members.length, 7);
   for (const p of members) {
     const text = personaText(p.id);
@@ -23,6 +23,13 @@ test('only the selected persona is loaded and v2.4 is preserved', () => {
     assert.ok(text.includes('花学拆解'));
     assert.ok(text.includes('严格格式'));
   }
+});
+test('persona prompt isolates the active identity from shared examples and prior roles', () => {
+  const qing = personaText('qing');
+  assert.match(qing, /\[huaxue:dialogue-v2\.5:qing\]/);
+  assert.match(qing, /当前且唯一的角色是晴公主/);
+  assert.match(qing, /用户询问“你是谁”时，必须回答晴公主/);
+  assert.doesNotMatch(qing, /以毛毛姐为例/);
 });
 test('switching preserves an active turn and applies at the next turn, even with the same signal', () => {
   const state = { lastMemberId: 'ning', sessions: { a: { activeMemberId: 'ning' } } };
@@ -35,6 +42,21 @@ test('switching preserves an active turn and applies at the next turn, even with
   session.events.push({ type: 'turn/start', data: { turn: 2 } });
   assert.equal(resolve(agent).memberId, 'qing');
   assert.equal(first.memberId, 'ning');
+});
+test('a completed turn releases the frozen persona before the next turn/start', () => {
+  const state = { lastMemberId: 'ning', sessions: { a: { activeMemberId: 'ning' } } };
+  const session = { id: 'a', header: { agentPreset: 'huashao2' }, events: [{ type: 'turn/start', data: { turn: 1 } }] };
+  const resolve = createTurnResolver(() => state);
+  const first = resolve({ session });
+  state.sessions.a.activeMemberId = 'qing';
+  session.events.push({ type: 'assistant/message', data: { turn: 1, step: 1, id: 'm1' } });
+  assert.equal(resolve({ session }), first);
+  session.events.push({ type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } });
+  const next = resolve({ session });
+  assert.equal(next.memberId, 'qing');
+  assert.equal(next.turn, 2);
+  session.events.push({ type: 'turn/start', data: { turn: 2 } });
+  assert.equal(resolve({ session }), next);
 });
 test('old sessions use their own member; new sessions inherit only the preference', () => {
   const resolve = createTurnResolver(() => ({ lastMemberId: 'yang', sessions: { old: { activeMemberId: 'mao' } } }));

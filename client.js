@@ -361,7 +361,7 @@ captureBusiness({
         .replace(/\n{3,}/g, '\n\n').trim();
     }
     function GameExperience({ runtime, api, parentSessionId, selected, close }) {
-      const savedGame = runtime.workbenches?.businessState('huaxue-game', {}) || {};
+      const savedGame = runtime.workbenches?.businessState(runtime.desktop ? 'huaxue-game:' + (parentSessionId || 'unbound') : 'huaxue-game', {}) || {};
       const dialogRef = React.useRef(null);
       const sending = React.useRef(false);
       const [index, setIndex] = React.useState(savedGame.index ?? null);
@@ -472,14 +472,18 @@ captureBusiness({
         if (!line.trim() || sending.current || running || ended) return;
         sending.current = true; followMessages.current = true; setBusy(true); setError('');
         try {
+          runtime.workbenches.assertActive?.();
+          const stillCurrent = runtime.workbenches.checkpoint?.() || (() => {});
           let id = sid;
           if (!id) {
             const workspace = runtime.workspaces.list.getSnapshot().items.find(w => w.sessionIds.includes(parentSessionId));
-            if (!workspace) throw Error('未找到当前工作区');
+            if (!workspace) throw Error('请先在花学工作台创建或打开所属会话，再发送接话。');
             id = await runtime.workbenches.create({ workbenchId: 'huaxue', workspaceId: workspace.workspaceId, background: true });
             await saveRecord(id, { activeMemberId: selected, initialMemberId: selected, gameId: node.id, gameParentId: parentSessionId, gameCreatedAt: Date.now(), gameFirstLine: line.trim(), gameEnded: false });
             setSid(id);
           }
+          stillCurrent();
+          runtime.workbenches.assertOwned?.(id);
           const session = runtime.sessions.binding(id)?.session;
           if (!session) throw Error('游戏会话未连接，请重试');
           await session.open();
@@ -492,12 +496,13 @@ captureBusiness({
           const promptText = isResultTurn ? userText + '\n\n【阶段结果】这是第 ' + turnNumber + ' 次接话，也是本阶段的第 5 轮。先正常完成本轮人物对话和现场反应，再依据已经发生的内容选择最贴切的阶段结果。不要结束游戏。总结最近五次用户接话及现场实际反应，相比阶段开始有哪些变化；不能只贴情绪标签，不能把沉默当成同意，不编造已和解、已离席或已确定的方案。回复末尾追加下列七行，每行必须完整，不要输出尖括号或复述规则：\n本轮结果：<6至16字的具体小标题，例如“住宿方案卡住，决定权先说清”>\n现场走向：<两句概括现在谈成了什么、没谈成什么>\n局面变化：<从本阶段起点到现在的变化，引用一个真实接话或动作作依据>\n你的影响：<用户哪句话改变了谁的回应；没有推动也如实说明，不打空泛分数>\n人物态度：<点名二至三位关键人物的当前立场和可观察反应，不猜测内心>\n未解矛盾：<一个尚未解决的具体分歧>\n下一步：<两种可以继续接话的方向及各自可能代价，不替用户决定、不强制结束>' : userText;
           if (isResultTurn) pendingResultTurn.current = turnNumber;
           setAwaiting(true);
+          stillCurrent();
           const result = await session.prompt([{ type: 'text', text: promptText }], 'queue');
           if (!result.ok) throw Error(result.error.message);
           setLastLine(userText); setLine(''); setPage('续演');
           await session.resync();
           await saveRecord(id, { gameTurnCount: turnNumber });
-          if (!sid) await runtime.workspaces.archiveSession(id);
+          if (!sid && !runtime.desktop) await runtime.workspaces.archiveSession(id);
         } catch (e) { setAwaiting(false); setError(e.message || '发送失败，请重试'); }
         finally { sending.current = false; setBusy(false); }
       }
@@ -957,7 +962,6 @@ captureBusiness({
     return { apply, inject: ['slots', 'remote', 'remote.settings'], Panel, members, installStyles, decorateAnalysis, decorateThinking, WorkbenchDialog, SwitchEvent, NativeWorkbench, GameExperience, gameTranscript, gameDialogue, GameReply, GameMessage, gameOutcome, isolateGameSessions, returnFromGame };
   }
 });
-
 
 const host=hostDef.factory(require),business=businessDef.factory(require);return {inject:host.inject,apply(ctx){host.apply(ctx);business.apply(ctx);}};
 }});

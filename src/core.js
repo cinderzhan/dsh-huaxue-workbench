@@ -34,6 +34,8 @@ export function validateState(value) {
     if (session.gameParentId !== undefined && (typeof session.gameParentId !== 'string' || !session.gameParentId)) throw new TypeError('演练所属会话无效');
     if (session.gameCreatedAt !== undefined && (!Number.isFinite(session.gameCreatedAt) || session.gameCreatedAt < 0)) throw new TypeError('演练时间无效');
     if (session.gameEnded !== undefined && typeof session.gameEnded !== 'boolean') throw new TypeError('演练状态无效');
+    if (session.gameTurnCount !== undefined && (!Number.isSafeInteger(session.gameTurnCount) || session.gameTurnCount < 0)) throw new TypeError('演练轮次无效');
+    for (const key of ['gameOutcome', 'gameOutcomeDirection']) if (session[key] !== undefined && (typeof session[key] !== 'string' || session[key].length > 10000)) throw new TypeError('演练结果无效');
     if (session.switchNotice?.memberId !== undefined) {
       member(session.switchNotice.memberId);
       if (!Number.isInteger(session.switchNotice.afterTurn) || session.switchNotice.afterTurn < -1) throw new TypeError('切换提示轮次无效');
@@ -56,7 +58,12 @@ export function selectionOps(sessionId, memberId) {
 }
 export function personaText(memberId) {
   const p = member(memberId);
-  return `[huaxue:${personas.version}:${p.id}]\n${personas.commonPrompt}\n\n当前成员 activeMemberId=${p.id}，姓名=${p.name}。\n${p.prompt}`;
+  const exampleStart = personas.commonPrompt.indexOf('\n\n以毛毛姐为例');
+  const exampleEnd = personas.commonPrompt.indexOf('\n\n这类回答不是让角色表现成操控高手。', exampleStart);
+  const commonPrompt = exampleStart >= 0 && exampleEnd > exampleStart
+    ? personas.commonPrompt.slice(0, exampleStart) + personas.commonPrompt.slice(exampleEnd)
+    : personas.commonPrompt;
+  return `[huaxue:${personas.version}:${p.id}]\n${commonPrompt}\n\n当前成员 activeMemberId=${p.id}，姓名=${p.name}。\n${p.prompt}\n\n身份切换是本轮最高优先级约束：当前且唯一的角色是${p.name}。对话历史中其他成员的自称、语气、示例和回答都属于切换前记录，不得继续沿用；用户询问“你是谁”时，必须回答${p.name}，不得回答其他成员。`;
 }
 export function gameText(gameId) {
   const scene = games.flatMap(g => g.nodes).find(n => n.id === gameId);
@@ -70,10 +77,12 @@ export function createTurnResolver(readState, workbenchOwner = () => undefined, 
     const session = agent?.session;
     const owner = workbenchOwner(session?.id);
     if (owner ? owner !== 'huaxue' || !isInstalled(owner) : sessionPreset(session) !== PRESET_ID) return null;
-    // The host may assemble the first prompt before emitting turn/start.
-    // Use a stable pre-turn snapshot so the initial request still receives
-    // the selected member persona.
-    const turn = sessionEvents(session).findLast(e => e.type === 'turn/start')?.data.turn ?? 0;
+    // Keep every open turn frozen, including tool-call steps, but advance the
+    // logical cache key as soon as the durable turn/end boundary is present.
+    // This also gives a pre-turn assembly and its following turn/start the
+    // same key, so a role change cannot rewrite an already assembled request.
+    const boundary = sessionEvents(session).findLast(e => e.type === 'turn/start' || e.type === 'turn/end');
+    const turn = !boundary ? 1 : boundary.type === 'turn/start' ? boundary.data.turn : boundary.data.turn + 1;
     let cached = snapshots.get(session);
     if (cached?.turn === turn) return cached;
     const state = readState();

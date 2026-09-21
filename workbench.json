@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "huaxue",
+  "title": "花少2 · 花学工作台",
+  "description": "七位花学旅伴、花学拆解与第八位嘉宾游戏，使用 Desktop 原生会话。",
+  "version": "0.3.5-desktop.1",
+  "author": {
+    "name": "gjz18342624299-arch"
+  },
+  "screenshots": [
+    {
+      "path": "assets/market-preview.jpg",
+      "alt": "花学工作台的场景回看与人物对话界面"
+    }
+  ],
+  "entry": "./desktop-client.js",
+  "customFrame": true,
+  "compatibility": {
+    "desktopWorkbenches": "^0.1.0",
+    "harness": "0.1.5-rc.2"
+  },
+  "requiredServices": ["desktopWorkbenchOwnership.read"],
+  "capabilities": ["custom-frame", "native-conversation", "managed-session-association", "session-persona", "local-business-storage"],
+  "permissions": {
+    "filesystem": "由用户选择原生工作区；设置和会话由宿主持久化。",
+    "network": "显式发送接话时使用用户配置的模型服务。"
+  }
+}

@@ -6,6 +6,8 @@ import { spawnSync } from 'node:child_process';
 import { inspectApp } from './doctor.mjs';
 import { beginTransaction, restoreTransaction } from './transaction.mjs';
 const arg = key => { const i = process.argv.indexOf(key); return i < 0 ? undefined : process.argv[i + 1]; };
+const packageMetadata = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+if (packageMetadata.exports?.['.'] === './desktop.js') throw Error('此版本默认使用 Desktop 标准入口。请由 Desktop 集成工作台包；旧 standalone 安装器不适用，未修改任何配置。参见 DESKTOP-ADAPTER.md。');
 if (!arg('--app') || !arg('--home')) throw Error('用法：node scripts/install.mjs --app <resources/app> --home <Harness 数据目录> [--apply]');
 const report = await inspectApp(arg('--app'));
 if (!report.supported) throw Error(`停止：未验证的版本 Desktop ${report.desktop} / Harness ${report.harness}。没有修改配置。`);

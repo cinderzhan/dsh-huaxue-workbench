@@ -6,7 +6,7 @@ const root = new URL('../', import.meta.url);
 const pkg = JSON.parse(await readFile(new URL('package.json', root)));
 assert.equal(pkg.dsh.bundle.patch, './cordis.patch.yml');
 assert.equal(pkg.name, 'dsh-huaxue-workbench');
-for (const file of ['index.js', 'client.js', ...(await readdir(new URL('src/', root))).filter(f=>f.endsWith('.js')).map(f=>'src/'+f)]) {
+for (const file of ['index.js', 'client.js', 'desktop.js', 'desktop-client.js', ...(await readdir(new URL('src/', root))).filter(f=>f.endsWith('.js')).map(f=>'src/'+f)]) {
   const code = await readFile(new URL(file, root), 'utf8');
   assert.ok(!/[CD]:[\\/](?:Users|DSH)[\\/]/i.test(code), `Local path leaked into ${file}`);
   if (!file.endsWith('host-client.js')) {

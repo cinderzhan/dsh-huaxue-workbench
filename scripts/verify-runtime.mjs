@@ -30,14 +30,14 @@ try {
   delete agent.session.events;
   agent.session.snapshotEvents = () => Object.freeze([...events]);
   const first = await ctx.systemPrompt.assemble(assembleContextFor(agent));
-  assert.ok(renderPrompt(first).includes('[huaxue:dialogue-v2.4:ning]'));
+  assert.ok(renderPrompt(first).includes('[huaxue:dialogue-v2.5:ning]'));
   assert.ok(renderPrompt(first).includes('DeepSeek Harness'));
   assert.ok(!renderPrompt(first).includes('BASE PERSONA'));
   assert.equal(first.sections.filter(s => s.name === 'deployment:persona-prefix').length, 1);
   await ctx.settings.mutate(NAMESPACE, selectionOps(agent.session.id, 'qing'));
-  assert.ok(renderPrompt(await ctx.systemPrompt.assemble({ agent })).includes('[huaxue:dialogue-v2.4:ning]'));
+  assert.ok(renderPrompt(await ctx.systemPrompt.assemble({ agent })).includes('[huaxue:dialogue-v2.5:ning]'));
   events.push({ type: 'turn/start', data: { turn: 2 } });
-  assert.ok(renderPrompt(await ctx.systemPrompt.assemble({ agent })).includes('[huaxue:dialogue-v2.4:qing]'));
+  assert.ok(renderPrompt(await ctx.systemPrompt.assemble({ agent })).includes('[huaxue:dialogue-v2.5:qing]'));
   assert.ok(renderPrompt(await ctx.systemPrompt.assemble({})).includes('BASE PERSONA'));
   await assert.rejects(ctx.settings.mutate(NAMESPACE, selectionOps('native-test', 'mao'), -1));
   assert.equal(ctx.settings.get(NAMESPACE).sessions['native-test'].activeMemberId, 'qing');
